@@ -1,10 +1,9 @@
 #include <Arduino.h>
 #include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <SerialFlash.h>
-#include <Adafruit_GFX.h>
+//#include <Wire.h>
+//#include <SPI.h>
+//#include <SD.h>
+//#include <SerialFlash.h>
 
 
 // GUItool: begin automatically generated code

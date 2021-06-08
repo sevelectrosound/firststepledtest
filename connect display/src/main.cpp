@@ -5,33 +5,59 @@
 #include <Adafruit_ST7735.h>
 #include <Fonts/FreeSerif18pt7b.h>  // Add a custom font
 
+#include <Audio.h>
+//#include <SD.h>
+//#include <SerialFlash.h>
+
 // Declare pins for the display:
 #define TFT_CS     14
 #define TFT_RST    10  // You can also connect this to the Arduino reset in which case, set this #define pin to -1!
 #define TFT_DC     15
 // The rest of the pins are pre-selected as the default hardware SPI for Arduino Uno (SCK = 13 and SDA = 11)
-
-
 // Create display:
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
 
-
-
-
-
-
-
+// GUItool: begin automatically generated code
+AudioSynthWaveform       waveform1;      //xy=265,233.75
+AudioOutputI2S           i2s1;           //xy=619,276
+AudioConnection          patchCord1(waveform1, 0, i2s1, 0);
+AudioConnection          patchCord2(waveform1, 0, i2s1, 1);
+AudioControlSGTL5000     sgtl5000_1;     //xy=641.0000152587891,216.75000667572021
+// GUItool: end automatically generated code
 
 int Variable1;  // Create a variable to have something dynamic to show on the display
-
-
-
-
-
-
+int treshold = 200;
+float a = 0;
+int atreshold()
+{
+  int a22 = analogRead(22);  
+  int avalue = map(a22, 0, 1023, 1023,0);
+  return avalue;
+}
 void setup()  // Start of setup
 {
+  Serial.begin(9600);
+  pinMode(13, OUTPUT);
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(22, INPUT_PULLUP);
+  digitalWrite(13, HIGH);
+  digitalWrite(0,LOW);
+  digitalWrite(1,LOW);
+  digitalWrite(2,LOW);
+  digitalWrite(3,LOW);
+  treshold = atreshold();
+  
+  AudioMemory(20);   
+  sgtl5000_1.enable();
+  sgtl5000_1.volume(0.6);
+  waveform1.begin(WAVEFORM_SAWTOOTH);
+  //waveform1.amplitude(0.75);
+  waveform1.frequency(240.00);
+  waveform1.pulseWidth(0.15);
 
   // Display setup:
 
@@ -56,8 +82,8 @@ void setup()  // Start of setup
   // Write to the display the text "Hello":
   tft.setCursor(0, 0);  // Set position (x,y)
   tft.setTextColor(ST7735_WHITE);  // Set color of text. First is the color of text and after is color of background
-  tft.setTextSize(3);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-  tft.println("Hello");  // Print a text or value
+  tft.setTextSize(4);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
+  tft.println(treshold);  // Print a text or value
 
   
   
@@ -111,10 +137,26 @@ void setup()  // Start of setup
 }  // End of setup
 
 
+float mapInput(int readValue)
+{
+  digitalWrite(13, HIGH);
+  int avalue = map(readValue, 0, 1023, 1023,0);
+  float result = ((avalue - treshold)/1023.00);
+  Serial.println(result);
+  return result;
+}
 
 
-
-
+int adc()
+{
+  digitalWrite(13, HIGH);
+  int a22 = analogRead(22);  
+  int avalue = map(a22, 0, 1023, 1023,0);
+  int result = (avalue - treshold);
+  Serial.println(result);
+  digitalWrite(13, LOW);
+  return result;
+}
 
 void loop()  // Start of loop
 {
@@ -124,7 +166,7 @@ void loop()  // Start of loop
   {
     Variable1 = 0;  // Set Variable1 to 0
   }
-
+  //int pinValue = analogRead(22);
 
   // Convert Variable1 into a string, so we can change the text alignment to the right:
   // It can be also used to add or remove decimal numbers.
@@ -133,18 +175,15 @@ void loop()  // Start of loop
   dtostrf(Variable1, 3, 0, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
 
 
-
-
-
-
-
   // We are going to print on the display everything that is dynamic on the loop, to refresh continuously:
 
+// Левое окошко
   // Write to the display the Variable1 with left text alignment:
   tft.setCursor(13, 67);  // Set position (x,y)
   tft.setTextColor(ST7735_YELLOW, ST7735_BLACK);  // Set color of text. First is the color of text and after is color of background
   tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-  tft.println(Variable1);  // Print a text or value
+  tft.println(555);  // Print a text or value
+  // tft.println(Variable1);  // Print a text or value
   
   // There is a problem when we go, for example, from 100 to 99 because it doesn't automatically write a background on
   // the last digit we are not longer refreshing. We need to check how many digits are and fill the space remaining.
@@ -161,19 +200,15 @@ void loop()  // Start of loop
 
 
 
-
+//Правое окошко
   // Write to the display the string with right text alignment:
   tft.setCursor(81, 67);  // Set position (x,y)
   tft.setTextColor(ST7735_GREEN, ST7735_BLACK);  // Set color of text. First is the color of text and after is color of background
   tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-  tft.println(string);  // Print a text or value
-
-
-
-
-
-
-
+  // tft.println(999);  // Print a text or value
+  Variable1 = adc();
+  a = mapInput(Variable1);
+  tft.println(a);  // Print a text or value
 
   // We are going to write the Variable1 with a custom text, so you can see the issues:
   
@@ -183,22 +218,21 @@ void loop()  // Start of loop
   tft.fillRect(0, 90, 55, 34, ST7735_BLACK);  // Draw filled rectangle (x,y,width,height,color)
 
 
-
-
   // Start using a custom font:
   tft.setFont(&FreeSerif18pt7b);  // Set a custom font
   tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
 
+ // текст внизу
   // Write to the display the Variable1:
   tft.setCursor(0, 120);  // Set position (x,y)
   tft.setTextColor(ST7735_MAGENTA);  // Set color of text. We are using custom font so there is no background color supported
+  // tft.println(777);  // Print a text or value
+  
   tft.println(Variable1);  // Print a text or value
 
   // Stop using a custom font:
   tft.setFont();  // Reset to standard font, to stop using any custom font previously set
-
-
-
-
-
+  int pinValue = analogRead(22);
+  waveform1.amplitude(mapInput(pinValue));
+  delay(10);
 }  // End of loop

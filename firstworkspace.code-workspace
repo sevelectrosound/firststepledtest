@@ -3,10 +3,6 @@
 		{
 			"name": "connect display",
 			"path": "connect display"
-		},
-		{
-			"name": "Testing sensor",
-			"path": "Testing sensor"
 		}
 	]
 }
